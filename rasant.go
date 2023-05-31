@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/CloudyKit/jet/v6"
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
 	"github.com/shaynemeyer/rasant/render"
@@ -24,6 +25,7 @@ type Rasant struct {
 	RootPath string
 	Routes *chi.Mux
 	Render *render.Render
+	JetViews *jet.Set
 	config config
 }
 
@@ -67,6 +69,13 @@ func (ras *Rasant) New(rootPath string) error {
 		port: os.Getenv("PORT"),
     renderer: os.Getenv("RENDERER"),
 	}
+
+	var views = jet.NewSet(
+		jet.NewOSFileSystemLoader(fmt.Sprintf("%s/views", rootPath)),
+		jet.InDevelopmentMode(),
+	)
+
+	ras.JetViews = views
 
 	ras.createRenderer()
 
@@ -124,6 +133,7 @@ func (ras *Rasant) createRenderer() {
 		Renderer: ras.config.renderer,
 		RootPath: ras.RootPath,
 		Port: ras.config.port,
+		JetViews: ras.JetViews,
 	}
 
 	ras.Render = &myRenderer
