@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
+	"github.com/shaynemeyer/rasant/render"
 )
 
 const version = "1.0.0"
@@ -22,6 +23,7 @@ type Rasant struct {
 	InfoLog *log.Logger
 	RootPath string
 	Routes *chi.Mux
+	Render *render.Render
 	config config
 }
 
@@ -60,10 +62,13 @@ func (ras *Rasant) New(rootPath string) error {
 	ras.Version = version
 	ras.RootPath = rootPath
 	ras.Routes = ras.routes().(*chi.Mux)
+	
 	ras.config = config{
 		port: os.Getenv("PORT"),
     renderer: os.Getenv("RENDERER"),
 	}
+
+	ras.createRenderer()
 
 	return nil
 }
@@ -85,7 +90,7 @@ func (ras *Rasant) ListenAndServe() {
 	srv := &http.Server{
 		Addr: fmt.Sprintf(":%s", os.Getenv("PORT")),
 		ErrorLog: ras.ErrorLog,
-		Handler: ras.routes(),
+		Handler: ras.Routes,
 		IdleTimeout: 30 * time.Second,
 		ReadTimeout: 30 * time.Second,
 		WriteTimeout: 600 * time.Second,
@@ -112,4 +117,14 @@ func (ras *Rasant) startLoggers() (*log.Logger, *log.Logger) {
 	errorLog = log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
 	return infoLog, errorLog
+}
+
+func (ras *Rasant) createRenderer() {
+	myRenderer := render.Render{
+		Renderer: ras.config.renderer,
+		RootPath: ras.RootPath,
+		Port: ras.config.port,
+	}
+
+	ras.Render = &myRenderer
 }
