@@ -1,3 +1,3 @@
 # Rasant
 
-Rasant is a Go implementation of Laravel.
+Rasant is a web application framework written in the Go language.
