@@ -66,7 +66,7 @@ func (ren *Render) GoPage(w http.ResponseWriter, r *http.Request, view string, d
 func (ren *Render) JetPage(w http.ResponseWriter, r *http.Request, templateName string, variables, data interface{}) error {
 	var vars jet.VarMap
 
-	if variables!= nil {
+	if variables == nil {
     vars = make(jet.VarMap)
   } else {
 		vars = variables.(jet.VarMap)
