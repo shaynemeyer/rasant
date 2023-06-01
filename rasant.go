@@ -9,9 +9,11 @@ import (
 	"time"
 
 	"github.com/CloudyKit/jet/v6"
+	"github.com/alexedwards/scs/v2"
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
 	"github.com/shaynemeyer/rasant/render"
+	"github.com/shaynemeyer/rasant/session"
 )
 
 const version = "1.0.0"
@@ -25,6 +27,7 @@ type Rasant struct {
 	RootPath string
 	Routes *chi.Mux
 	Render *render.Render
+	Session *scs.SessionManager
 	JetViews *jet.Set
 	config config
 }
@@ -32,6 +35,8 @@ type Rasant struct {
 type config struct {
 	port string
 	renderer string
+	cookie cookieConfig
+	sessionType string
 }
 
 func (ras *Rasant) New(rootPath string) error {
@@ -68,7 +73,26 @@ func (ras *Rasant) New(rootPath string) error {
 	ras.config = config{
 		port: os.Getenv("PORT"),
     renderer: os.Getenv("RENDERER"),
+		cookie: cookieConfig{
+			name: os.Getenv("COOKIE_NAME"),
+			lifetime: os.Getenv("COOKIE_LIFETIME"),
+			persist: os.Getenv("COOKIE_PERSISTS"),
+			secure: os.Getenv("COOKIE_SECURE"),
+			domain: os.Getenv("COOKIE_DOMAIN"),
+		},
+		sessionType: os.Getenv("SESSION_TYPE"),
 	}
+
+	// create session
+	sess := session.Session {
+		CookieLifetime: ras.config.cookie.lifetime,
+		CookiePersist: ras.config.cookie.persist,
+		CookieName: ras.config.cookie.name,
+		SessionType: ras.config.sessionType,
+		CookieDomain: ras.config.cookie.domain,
+	}
+
+	ras.Session = sess.InitSession()
 
 	var views = jet.NewSet(
 		jet.NewOSFileSystemLoader(fmt.Sprintf("%s/views", rootPath)),
