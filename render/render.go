@@ -1,6 +1,7 @@
 package render
 
 import (
+	"errors"
 	"fmt"
 	"html/template"
 	"log"
@@ -37,9 +38,11 @@ func (ren *Render) Page(w http.ResponseWriter, r *http.Request, view string, var
 		return ren.GoPage(w, r, view, data)
 	case "jet":
 		return ren.JetPage(w, r, view, variables, data)
+	default:
+
 	}
 	
-	return nil
+	return errors.New("no rendering engine specified")
 }
 
 // GoPage renders a standard Go template
