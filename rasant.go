@@ -28,6 +28,7 @@ type Rasant struct {
 	Routes *chi.Mux
 	Render *render.Render
 	Session *scs.SessionManager
+	DB Database
 	JetViews *jet.Set
 	config config
 }
@@ -37,6 +38,7 @@ type config struct {
 	renderer string
 	cookie cookieConfig
 	sessionType string
+	database databaseConfig
 }
 
 func (ras *Rasant) New(rootPath string) error {
@@ -63,6 +65,20 @@ func (ras *Rasant) New(rootPath string) error {
 
 	// create loggers
 	infoLog, errorLog := ras.startLoggers()
+
+	// connect to database
+	if os.Getenv("DATABASE_TYPE") != "" {
+		db, err := ras.OpenDB(os.Getenv("DATABASE_TYPE"), ras.BuildDSN())
+		if err!= nil {
+      errorLog.Println(err)
+			os.Exit(1)
+    }
+		ras.DB = Database{
+			DataType: os.Getenv("DATABASE_TYPE"),
+			Pool: db,
+		}
+	}
+
 	ras.InfoLog = infoLog
 	ras.ErrorLog = errorLog
 	ras.Debug, _ = strconv.ParseBool(os.Getenv("DEBUG"))
@@ -161,4 +177,26 @@ func (ras *Rasant) createRenderer() {
 	}
 
 	ras.Render = &myRenderer
+}
+
+func (ras *Rasant) BuildDSN() string {
+	var dsn string
+
+	switch os.Getenv("DATABASE_TYPE"){
+	case "postgres", "postgresql":
+		dsn = fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=%s timezone=UTC", 
+		os.Getenv("DATABASE_HOST"), 
+		os.Getenv("DATABASE_PORT"), 
+		os.Getenv("DATABASE_USER"), 
+		os.Getenv("DATABASE_NAME"),
+		os.Getenv("DATABASE_SSL_MODE"))
+
+		if os.Getenv("DATABASE_PASS") != "" {
+			dsn = fmt.Sprintf("%s password=%s", dsn, os.Getenv("DATABASE_PASS"))
+		}
+	default:
+
+	}
+
+	return dsn
 }
