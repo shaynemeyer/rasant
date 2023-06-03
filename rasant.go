@@ -181,6 +181,7 @@ func (ras *Rasant) createRenderer() {
 		RootPath: ras.RootPath,
 		Port: ras.config.port,
 		JetViews: ras.JetViews,
+		Session: ras.Session,
 	}
 
 	ras.Render = &myRenderer
@@ -197,7 +198,7 @@ func (ras *Rasant) BuildDSN() string {
 		os.Getenv("DATABASE_USER"), 
 		os.Getenv("DATABASE_NAME"),
 		os.Getenv("DATABASE_SSL_MODE"))
-		
+
 		// we check to see if a database passsword has been supplied, since including "password=" with nothing
 		// after it sometimes causes postgres to fail to allow a connection.
 		if os.Getenv("DATABASE_PASS") != "" {
