@@ -97,6 +97,10 @@ func (ras *Rasant) New(rootPath string) error {
 			domain: os.Getenv("COOKIE_DOMAIN"),
 		},
 		sessionType: os.Getenv("SESSION_TYPE"),
+		database: databaseConfig{
+			database: os.Getenv("DATABASE_TYPE"),
+			dsn: ras.BuildDSN(),
+		},
 	}
 
 	// create session
@@ -122,6 +126,7 @@ func (ras *Rasant) New(rootPath string) error {
 	return nil
 }
 
+// Init creates necessary folders for our Celeritas application
 func (ras *Rasant) Init(p initPaths) error {
 	root := p.rootPath
 	for _, path := range p.folderNames {
@@ -144,6 +149,8 @@ func (ras *Rasant) ListenAndServe() {
 		ReadTimeout: 30 * time.Second,
 		WriteTimeout: 600 * time.Second,
 	}
+
+	defer ras.DB.Pool.Close()
 
 	ras.InfoLog.Printf("Listing on port %s", os.Getenv("PORT"))
 	err := srv.ListenAndServe()
@@ -184,13 +191,15 @@ func (ras *Rasant) BuildDSN() string {
 
 	switch os.Getenv("DATABASE_TYPE"){
 	case "postgres", "postgresql":
-		dsn = fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=%s timezone=UTC", 
+		dsn = fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=%s timezone=UTC connect_timeout=5", 
 		os.Getenv("DATABASE_HOST"), 
 		os.Getenv("DATABASE_PORT"), 
 		os.Getenv("DATABASE_USER"), 
 		os.Getenv("DATABASE_NAME"),
 		os.Getenv("DATABASE_SSL_MODE"))
-
+		
+		// we check to see if a database passsword has been supplied, since including "password=" with nothing
+		// after it sometimes causes postgres to fail to allow a connection.
 		if os.Getenv("DATABASE_PASS") != "" {
 			dsn = fmt.Sprintf("%s password=%s", dsn, os.Getenv("DATABASE_PASS"))
 		}
