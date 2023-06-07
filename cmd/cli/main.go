@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"os"
 
 	"errors"
@@ -15,6 +14,7 @@ const version = "1.0.0"
 var ras rasant.Rasant
 
 func main() {
+	var message string
 	arg1, arg2, arg3, err := validateInput()
 	if err != nil {
 		exitGracefully(err)
@@ -27,6 +27,15 @@ func main() {
 		showHelp()
 	case "version":
 		color.Yellow("Application Version: " + version)
+	case "migrate":
+		if arg2 == "" {
+			arg2 = "up"
+		}
+		err = doMigrate(arg2, arg3)
+		if err!= nil {
+      exitGracefully(err)
+    }
+		message = "Migrations complete!"
   case "make":
 		if arg2 == "" {
 			exitGracefully(errors.New("make requires a subcommand: (migration|model|handler)"))
@@ -36,8 +45,10 @@ func main() {
       exitGracefully(err)
     }
 	default:
-		log.Println(arg2, arg3)
+		showHelp()
 	}
+
+	exitGracefully(nil, message)
 }
 
 func validateInput() (string, string, string, error) {

@@ -26,6 +26,20 @@ func (ras *Rasant) MigrateUp(dsn string) error {
 	return nil
 }
 
+func (ras *Rasant) MigrateDownAll(dsn string) error {
+	m, err := migrate.New("file://" + ras.RootPath + "/migrations", dsn)
+	if err != nil {
+		return err
+	}
+	defer m.Close()
+
+	if err := m.Down(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (ras *Rasant) Steps(n int, dsn string) error {
 	m, err := migrate.New("file://" + ras.RootPath + "/migrations", dsn)
 	if err!= nil {
