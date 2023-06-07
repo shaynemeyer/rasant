@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/fatih/color"
 	"github.com/joho/godotenv"
 )
 
@@ -51,4 +52,16 @@ func getDSN() string {
 	} 
 		
 	return "mysql://" + ras.BuildDSN()
+}
+
+func showHelp() {
+	color.Yellow(`Available commands:
+
+	help 						      - show the help commands
+	version               - print application version
+	migrate               - runs all up migrations that have not run previously
+	migrate down          - reverses the most recent migration
+	migrate reset         - runs all down migrations in reverse order, and then all up migrations
+	make migration <name> - creates two new up and down migrations in the migrations folder
+	`)
 }
