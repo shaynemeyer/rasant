@@ -57,7 +57,7 @@ func getDSN() string {
 func showHelp() {
 	color.Yellow(`Available commands:
 
-	help 						      - show the help commands
+	help                  - show the help commands
 	version               - print application version
 	migrate               - runs all up migrations that have not run previously
 	migrate down          - reverses the most recent migration
