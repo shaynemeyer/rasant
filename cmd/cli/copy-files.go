@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 )
 
-// go:embed templates
+//go:embed templates
 var templateFS embed.FS
 
 func copyFileFromTemplate(templatePath, targetFile string) error {
