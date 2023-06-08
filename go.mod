@@ -13,6 +13,7 @@ require (
 )
 
 require (
+	github.com/gertd/go-pluralize v0.2.1 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
@@ -34,4 +35,5 @@ require (
 	github.com/CloudyKit/fastprinter v0.0.0-20200109182630-33d98a066a53 // indirect
 	github.com/CloudyKit/jet/v6 v6.2.0
 	github.com/alexedwards/scs/v2 v2.5.1
+	github.com/iancoleman/strcase v0.2.0
 )
