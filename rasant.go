@@ -110,6 +110,7 @@ func (ras *Rasant) New(rootPath string) error {
 		CookieName: ras.config.cookie.name,
 		SessionType: ras.config.sessionType,
 		CookieDomain: ras.config.cookie.domain,
+		DBPool: ras.DB.Pool,
 	}
 
 	ras.Session = sess.InitSession()
