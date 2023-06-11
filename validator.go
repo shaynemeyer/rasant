@@ -27,7 +27,7 @@ func (v *Validation) Valid() bool {
 }
 
 func (v *Validation) AddError(key, message string) {
-	if _, exists := v.Errors[key]; exists {
+	if _, exists := v.Errors[key]; !exists {
 		v.Errors[key] = message
 	}
 }
@@ -44,7 +44,7 @@ func (v *Validation) Required(r *http.Request, fields ...string) {
 	for _, field := range fields {
 		value := r.Form.Get(field)
 		if strings.TrimSpace(value) == "" {
-			v.AddError(field, "This field cannot be black")
+			v.AddError(field, "This field cannot be blank")
 		}
 	}
 }

@@ -31,6 +31,7 @@ type Rasant struct {
 	DB Database
 	JetViews *jet.Set
 	config config
+	EncryptionKey string
 }
 
 type config struct {
@@ -114,6 +115,7 @@ func (ras *Rasant) New(rootPath string) error {
 	}
 
 	ras.Session = sess.InitSession()
+	ras.EncryptionKey = os.Getenv("KEY")
 
 	var views = jet.NewSet(
 		jet.NewOSFileSystemLoader(fmt.Sprintf("%s/views", rootPath)),
