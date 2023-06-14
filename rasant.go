@@ -11,7 +11,9 @@ import (
 	"github.com/CloudyKit/jet/v6"
 	"github.com/alexedwards/scs/v2"
 	"github.com/go-chi/chi/v5"
+	"github.com/gomodule/redigo/redis"
 	"github.com/joho/godotenv"
+	"github.com/shaynemeyer/rasant/cache"
 	"github.com/shaynemeyer/rasant/render"
 	"github.com/shaynemeyer/rasant/session"
 )
@@ -32,6 +34,7 @@ type Rasant struct {
 	JetViews *jet.Set
 	config config
 	EncryptionKey string
+	Cache cache.Cache
 }
 
 type config struct {
@@ -40,6 +43,7 @@ type config struct {
 	cookie cookieConfig
 	sessionType string
 	database databaseConfig
+	redis redisConfig
 }
 
 func (ras *Rasant) New(rootPath string) error {
@@ -80,6 +84,11 @@ func (ras *Rasant) New(rootPath string) error {
 		}
 	}
 
+	if os.Getenv("CACHE") == "redis" {
+		myRedisCache := ras.createClientRedisCache()
+		ras.Cache = myRedisCache
+	}
+
 	ras.InfoLog = infoLog
 	ras.ErrorLog = errorLog
 	ras.Debug, _ = strconv.ParseBool(os.Getenv("DEBUG"))
@@ -101,6 +110,11 @@ func (ras *Rasant) New(rootPath string) error {
 		database: databaseConfig{
 			database: os.Getenv("DATABASE_TYPE"),
 			dsn: ras.BuildDSN(),
+		},
+		redis: redisConfig{
+			host: os.Getenv("REDIS_HOST"),
+			password: os.Getenv("REDIS_PASSWORD"),
+			prefix: os.Getenv("REDIS_PREFIX"),
 		},
 	}
 
@@ -166,6 +180,30 @@ func (ras *Rasant) checkDotEnv(path string) error {
 		return err
 	}
 	return nil
+}
+
+func (ras *Rasant) createClientRedisCache() *cache.RedisCache {
+	cacheClient := cache.RedisCache{
+		Conn: ras.createRedisPool(),
+		Prefix: ras.config.redis.prefix,
+	}
+
+	return &cacheClient
+}
+
+func (ras *Rasant) createRedisPool() *redis.Pool {
+	return &redis.Pool{
+		MaxIdle: 50,
+		MaxActive: 10000,
+		IdleTimeout: 240 * time.Second,
+		Dial: func() (redis.Conn, error) {
+			return redis.Dial("tcp", ras.config.redis.host, redis.DialPassword(ras.config.redis.password))
+		},
+		TestOnBorrow: func(conn redis.Conn, t time.Time) error {
+			_, err := conn.Do("PING")
+      return err
+		},
+	}
 }
 
 func (ras *Rasant) startLoggers() (*log.Logger, *log.Logger) {
