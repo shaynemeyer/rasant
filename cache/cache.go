@@ -41,7 +41,7 @@ func encode(item Entry) ([]byte, error) {
 	b := bytes.Buffer{}
 	e := gob.NewEncoder(&b)
 	err := e.Encode(item)
-	if err!= nil {
+	if err != nil {
     return nil, err
   }
 
@@ -54,7 +54,7 @@ func decode(str string) (Entry, error) {
 	b.Write([]byte(str))
 	d := gob.NewDecoder(&b)
 	err := d.Decode(&item)
-	if err!= nil {
+	if err != nil {
 		return nil, err
 	}
 	return item, nil
@@ -66,12 +66,12 @@ func (c *RedisCache) Get(str string) (interface{}, error) {
 	defer conn.Close()
 
 	cacheEntry, err := redis.Bytes(conn.Do("GET", key))
-	if err!= nil {
+	if err != nil {
     return nil, err
   }
 
 	decoded, err := decode(string(cacheEntry))
-	if err!= nil {
+	if err != nil {
     return nil, err
   }
 
@@ -88,18 +88,18 @@ func (c *RedisCache) Set(str string, value interface{}, expires ...int) error {
 	entry := Entry{}
 	entry[key] = value
 	encoded, err := encode(entry)
-	if err!= nil {
+	if err != nil {
     return err
   }
 
 	if len(expires) > 0 {
 		_, err := conn.Do("SETEX", key, expires[0], string(encoded))
-		if err!= nil {
+		if err != nil {
       return err
     }
 	} else {
 		_, err := conn.Do("SET", key, string(encoded))
-    if err!= nil {
+    if err != nil {
       return err
     }
 	}
@@ -112,7 +112,7 @@ func (c *RedisCache) Forget(str string) error {
 	defer conn.Close()
 
 	_, err := conn.Do("DEL", key)
-	if err!= nil {
+	if err != nil {
 		return err
   }
 
@@ -131,7 +131,7 @@ func (c *RedisCache) EmptyByMatch(str string) error {
 
 	for _, x := range keys {
 		_, err := conn.Do("DEL", x)
-		if err!= nil {
+		if err != nil {
 				return err
 			}
 	}

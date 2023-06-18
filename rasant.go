@@ -20,6 +20,8 @@ import (
 
 const version = "1.0.0"
 
+// Rasant is the overall type for the Rasant package. Members that are exported in this type
+// are available to any application that uses it.
 type Rasant struct {
 	AppName string
 	Debug bool
@@ -46,6 +48,8 @@ type config struct {
 	redis redisConfig
 }
 
+// New reads the .env file, creates our application config, populates the Rasant type with settings
+// based on .env values, and creates necessary folders and files if they don't exist
 func (ras *Rasant) New(rootPath string) error {
 	pathConfig := initPaths{
 		rootPath: rootPath,
@@ -53,18 +57,18 @@ func (ras *Rasant) New(rootPath string) error {
 	}
 
 	err := ras.Init(pathConfig)
-	if err!= nil {
+	if err != nil {
 		return err
 	}
 
 	err = ras.checkDotEnv(rootPath) 
-	if err!= nil {
+	if err != nil {
 		return err
 	}
 
 	// read .env
 	err = godotenv.Load(rootPath + "/.env")
-	if err!= nil {
+	if err != nil {
     return err
   }
 
@@ -176,7 +180,7 @@ func (ras *Rasant) ListenAndServe() {
 
 func (ras *Rasant) checkDotEnv(path string) error { 
 	err := ras.CreateFileIfNotExist(fmt.Sprintf("%s/.env", path))
-	if err!= nil {
+	if err != nil {
 		return err
 	}
 	return nil

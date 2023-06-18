@@ -22,7 +22,7 @@ func (ras *Rasant) ReadJSON(w http.ResponseWriter, r *http.Request, data interfa
 	}
 
 	err = dec.Decode(&struct{}{})
-	if err!= io.EOF {
+	if err != io.EOF {
     return errors.New("body must only have a single json value")
   }
 
