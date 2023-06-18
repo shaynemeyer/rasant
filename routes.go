@@ -16,6 +16,7 @@ func (ras *Rasant) routes() http.Handler {
 	}
 	mux.Use(middleware.Recoverer)
 	mux.Use(ras.SessionLoad)
+	mux.Use(ras.NoSurf)
 
 	return mux
 }

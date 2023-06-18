@@ -18,6 +18,7 @@ require (
 	github.com/alicebob/miniredis/v2 v2.30.3 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
 	github.com/gomodule/redigo v1.8.9 // indirect
+	github.com/justinas/nosurf v1.1.1 // indirect
 	github.com/yuin/gopher-lua v1.1.0 // indirect
 )
 
