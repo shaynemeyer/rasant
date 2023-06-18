@@ -143,12 +143,20 @@ func (ras *Rasant) New(rootPath string) error {
 	ras.Session = sess.InitSession()
 	ras.EncryptionKey = os.Getenv("KEY")
 
-	var views = jet.NewSet(
-		jet.NewOSFileSystemLoader(fmt.Sprintf("%s/views", rootPath)),
-		jet.InDevelopmentMode(),
-	)
-
-	ras.JetViews = views
+	if ras.Debug {
+		var views = jet.NewSet(
+			jet.NewOSFileSystemLoader(fmt.Sprintf("%s/views", rootPath)),
+			jet.InDevelopmentMode(),
+		)
+	
+		ras.JetViews = views
+	} else {
+		var views = jet.NewSet(
+			jet.NewOSFileSystemLoader(fmt.Sprintf("%s/views", rootPath)),
+		)
+	
+		ras.JetViews = views
+	}
 
 	ras.createRenderer()
 
