@@ -20,6 +20,8 @@ import (
 
 const version = "1.0.0"
 
+var myRedisCache *cache.RedisCache
+
 // Rasant is the overall type for the Rasant package. Members that are exported in this type
 // are available to any application that uses it.
 type Rasant struct {
@@ -88,8 +90,8 @@ func (ras *Rasant) New(rootPath string) error {
 		}
 	}
 
-	if os.Getenv("CACHE") == "redis" {
-		myRedisCache := ras.createClientRedisCache()
+	if os.Getenv("CACHE") == "redis" || os.Getenv("SESSION_TYPE") == "redis" {
+		myRedisCache = ras.createClientRedisCache()
 		ras.Cache = myRedisCache
 	}
 
@@ -129,7 +131,13 @@ func (ras *Rasant) New(rootPath string) error {
 		CookieName: ras.config.cookie.name,
 		SessionType: ras.config.sessionType,
 		CookieDomain: ras.config.cookie.domain,
-		DBPool: ras.DB.Pool,
+	}
+
+	switch ras.config.sessionType {
+		case "redis":
+			sess.RedisPool = myRedisCache.Conn
+		case "mysql", "postgres", "mariadb", "postgresql":
+			sess.DBPool = ras.DB.Pool
 	}
 
 	ras.Session = sess.InitSession()

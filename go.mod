@@ -13,6 +13,7 @@ require (
 )
 
 require (
+	github.com/alexedwards/scs/redisstore v0.0.0-20230327161757-10d4299e3b24 // indirect
 	github.com/alicebob/gopher-json v0.0.0-20200520072559-a9ecdc9d1d3a // indirect
 	github.com/alicebob/miniredis/v2 v2.30.3 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
