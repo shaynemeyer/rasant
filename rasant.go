@@ -10,9 +10,11 @@ import (
 
 	"github.com/CloudyKit/jet/v6"
 	"github.com/alexedwards/scs/v2"
+	"github.com/dgraph-io/badger/v3"
 	"github.com/go-chi/chi/v5"
 	"github.com/gomodule/redigo/redis"
 	"github.com/joho/godotenv"
+	"github.com/robfig/cron/v3"
 	"github.com/shaynemeyer/rasant/cache"
 	"github.com/shaynemeyer/rasant/render"
 	"github.com/shaynemeyer/rasant/session"
@@ -21,6 +23,7 @@ import (
 const version = "1.0.0"
 
 var myRedisCache *cache.RedisCache
+var myBadgerCache *cache.BadgerCache
 
 // Rasant is the overall type for the Rasant package. Members that are exported in this type
 // are available to any application that uses it.
@@ -39,6 +42,7 @@ type Rasant struct {
 	config config
 	EncryptionKey string
 	Cache cache.Cache
+	Scheduler *cron.Cron
 }
 
 type config struct {
@@ -93,6 +97,19 @@ func (ras *Rasant) New(rootPath string) error {
 	if os.Getenv("CACHE") == "redis" || os.Getenv("SESSION_TYPE") == "redis" {
 		myRedisCache = ras.createClientRedisCache()
 		ras.Cache = myRedisCache
+	}
+
+	if os.Getenv("CACHE") == "badger" {
+		myBadgerCache = ras.createClientBadgerCache()
+		ras.Cache = myBadgerCache
+
+		_, err = ras.Scheduler.AddFunc("@daily", func() {
+			_ = myBadgerCache.Conn.RunValueLogGC(0.7)
+		})
+
+		if err != nil {	
+			return err
+		}
 	}
 
 	ras.InfoLog = infoLog
@@ -211,6 +228,14 @@ func (ras *Rasant) createClientRedisCache() *cache.RedisCache {
 	return &cacheClient
 }
 
+func (ras *Rasant) createClientBadgerCache() *cache.BadgerCache {
+	cacheClient := cache.BadgerCache{
+		Conn: ras.createBadgerConn(),
+	}
+
+	return &cacheClient
+}
+
 func (ras *Rasant) createRedisPool() *redis.Pool {
 	return &redis.Pool{
 		MaxIdle: 50,
@@ -224,6 +249,15 @@ func (ras *Rasant) createRedisPool() *redis.Pool {
       return err
 		},
 	}
+}
+
+func (ras *Rasant) createBadgerConn() *badger.DB {
+	db, err := badger.Open(badger.DefaultOptions(ras.RootPath + "/tmp/badger"))
+	if err != nil {
+    return nil
+  }
+
+	return db
 }
 
 func (ras *Rasant) startLoggers() (*log.Logger, *log.Logger) {
