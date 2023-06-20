@@ -96,6 +96,9 @@ func (ras *Rasant) New(rootPath string) error {
 		}
 	}
 
+	scheduler := cron.New()
+	ras.Scheduler = scheduler
+
 	if os.Getenv("CACHE") == "redis" || os.Getenv("SESSION_TYPE") == "redis" {
 		myRedisCache = ras.createClientRedisCache()
 		ras.Cache = myRedisCache
