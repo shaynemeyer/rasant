@@ -123,10 +123,10 @@ func (ras *Rasant) New(rootPath string) error {
 
 	ras.InfoLog = infoLog
 	ras.ErrorLog = errorLog
-	ras.Mail = ras.createMailer()
 	ras.Debug, _ = strconv.ParseBool(os.Getenv("DEBUG"))
 	ras.Version = version
 	ras.RootPath = rootPath
+	ras.Mail = ras.createMailer()
 	ras.Routes = ras.routes().(*chi.Mux)
 	
 	ras.config = config{
