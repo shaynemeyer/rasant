@@ -2,4 +2,4 @@
 .env
 
 cache/testdata/*
-*/coverage.out
+coverage.out
