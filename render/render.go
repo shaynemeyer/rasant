@@ -47,6 +47,9 @@ func (ren *Render) defaultData(td *TemplateData, r *http.Request) *TemplateData 
 		td.IsAuthenticated = true
 	}
 
+	td.Error = ren.Session.PopString(r.Context(), "error")
+	td.Flash = ren.Session.PopString(r.Context(), "flash")
+
 	return td
 }
 
