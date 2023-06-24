@@ -213,7 +213,7 @@ func (ras *Rasant) New(rootPath string) error {
 	return nil
 }
 
-// Init creates necessary folders for our Celeritas application
+// Init creates necessary folders for our Rasant application
 func (ras *Rasant) Init(p initPaths) error {
 	root := p.rootPath
 	for _, path := range p.folderNames {
