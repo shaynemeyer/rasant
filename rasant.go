@@ -17,6 +17,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/robfig/cron/v3"
 	"github.com/shaynemeyer/rasant/cache"
+	"github.com/shaynemeyer/rasant/filesystems/miniofilesystem"
 	"github.com/shaynemeyer/rasant/mailer"
 	"github.com/shaynemeyer/rasant/render"
 	"github.com/shaynemeyer/rasant/session"
@@ -49,6 +50,7 @@ type Rasant struct {
 	Scheduler *cron.Cron
 	Mail mailer.Mail
 	Server Server
+	FileSystems map[string]interface{}
 }
 
 type Server struct {
@@ -207,6 +209,7 @@ func (ras *Rasant) New(rootPath string) error {
 	}
 
 	ras.createRenderer()
+	ras.FileSystems = ras.createFileSystems()
 
 	go ras.Mail.ListenForMail()
 
@@ -369,4 +372,27 @@ func (ras *Rasant) BuildDSN() string {
 	}
 
 	return dsn
+}
+
+func (ras *Rasant) createFileSystems() map[string]interface{} {
+	fileSystems := make(map[string]interface{})
+
+	if os.Getenv("MINIO_SECRET") != "" {
+		useSSL := false
+		if strings.ToLower(os.Getenv("MINIO_USESSL")) == "true" {
+      useSSL = true
+    }
+
+		minio := miniofilesystem.Minio{
+			Endpoint: os.Getenv("MINIO_ENDPOINT"),
+			Key: os.Getenv("MINIO_KEY"),
+			Secret: os.Getenv("MINIO_SECRET"),
+			UseSSL: useSSL,
+			Region: os.Getenv("MINIO_REGION"),
+			Bucket: os.Getenv("MINIO_BUCKET"),
+		}
+		fileSystems["MINIO"] = minio
+	}
+
+	return fileSystems
 }
